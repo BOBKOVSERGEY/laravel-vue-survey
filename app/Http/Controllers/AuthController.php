@@ -8,6 +8,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rules\Password;
+use Laravel\Sanctum\Sanctum;
 
 class AuthController extends Controller
 {
@@ -23,13 +24,12 @@ class AuthController extends Controller
             ]
         ]);
 
-
+        /** @var \App\Models\User $user */
         $user = User::create([
             'name' => $data['name'],
             'email' => $data['email'],
             'password' => bcrypt($data['password'])
         ]);
-
         $token = $user->createToken('main')->plainTextToken;
 
         return response([
@@ -47,11 +47,10 @@ class AuthController extends Controller
             ],
             'remember' => 'boolean'
         ]);
-
         $remember = $credentials['remember'] ?? false;
         unset($credentials['remember']);
 
-        if(!Auth::attempt($credentials, $remember)) {
+        if (!Auth::attempt($credentials, $remember)) {
             return response([
                 'error' => 'The Provided credentials are not correct'
             ], 422);
@@ -64,4 +63,18 @@ class AuthController extends Controller
             'token' => $token
         ]);
     }
+
+    public function logout()
+    {
+        /** @var User $user */
+        $user = Auth::user();
+        // Revoke the token that was used to authenticate the current request...
+        $user->currentAccessToken()->delete();
+
+        return response([
+            'success' => true
+        ]);
+    }
+
+
 }
