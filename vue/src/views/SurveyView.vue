@@ -33,7 +33,7 @@
       Loading...
     </div>
     <div v-else >
-        <form @submit.prevent="saveSurvey">
+        <form @submit.prevent="saveSurvey" class="animate-fade-in-down">
           <div class="shadow sm:rounded-md sm:overflow-hidden">
             <!-- Survey Fields -->
             <div class="px-4 py-5 bg-white space-y-6 sm:p-6">
@@ -284,15 +284,15 @@ function questionChange(question) {
  * Create or update survey
  */
 function saveSurvey() {
-  /*let action = "created";
+  let action = "created";
   if (model.value.id) {
     action = "updated";
-  }*/
+  }
   store.dispatch("saveSurvey", { ...model.value }).then(({ data }) => {
-    /*store.commit("notify", {
+    store.commit("notify", {
       type: "success",
       message: "The survey was successfully " + action,
-    });*/
+    });
     router.push({
       name: "SurveyView",
       params: { id: data.data.id },

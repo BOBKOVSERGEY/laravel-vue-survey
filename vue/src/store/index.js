@@ -10,13 +10,19 @@ const store = createStore({
     },
     surveys: {
       loading: false,
-      data: []
+      data: [],
+      links: []
     },
     currentSurvey: {
       data: {},
       loading: false,
     },
     questionTypes: ["text", "select", "radio", "checkbox", "textarea"],
+    notification: {
+      show: false,
+      message: null,
+      type: null
+    }
   },
   getters: {},
   actions: {
@@ -66,6 +72,20 @@ const store = createStore({
           throw err;
         });
     },
+    getSurveyBySlug({ commit }, slug) {
+      commit("setCurrentSurveyLoading", true);
+      return axiosClient
+        .get(`/survey-by-slug/${slug}`)
+        .then((res) => {
+          commit("setCurrentSurvey", res.data);
+          commit("setCurrentSurveyLoading", false);
+          return res;
+        })
+        .catch((err) => {
+          commit("setCurrentSurveyLoading", false);
+          throw err;
+        });
+    },
     saveSurvey({ commit, dispatch }, survey) {
 
       delete survey.image_url;
@@ -93,7 +113,9 @@ const store = createStore({
         return res;
       });
     },
-
+    saveSurveyAnswer({commit}, {surveyId, answers}) {
+      return axiosClient.post(`/survey/${surveyId}/answer`, {answers});
+    },
   },
   mutations: {
     logout: (state) => {
@@ -121,6 +143,14 @@ const store = createStore({
     setCurrentSurvey: (state, survey) => {
       state.currentSurvey.data = survey.data;
     },
+    notify: (state, { message, type }) => {
+      state.notification.show = true;
+      state.notification.type = type;
+      state.notification.message = message;
+      setTimeout(() => {
+        state.notification.show = false;
+      }, 3000)
+    }
   },
   modules: {},
 });
